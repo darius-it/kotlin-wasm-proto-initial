@@ -4,34 +4,34 @@ fun main() {
     println("Loaded Kotlin WASM module successfully.")
 }
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun printTest() {
+    println("Hello from Kotlin WASM!")
+}
+
 @OptIn(ExperimentalJsExport::class, ExperimentalWasmJsInterop::class)
 @JsExport
-fun matrixMultiplication(
-    mat1: JsArray<JsNumber>, mat1Dimension: JsNumber,
-    mat2: JsArray<JsNumber>, mat2Dimension: JsNumber,
-): JsArray<JsNumber> {
-    require(mat1Dimension == mat2Dimension) {
-        "Matrix dimension mismatch! Please only use square N x N matrices."
-    }
+fun firstFibonacciNumbers(count: Int): JsArray<JsNumber> {
+    val fibs = generateSequence(Pair(1,1)) {
+        Pair(it.second, it.first + it.second)
+    }.map { it.first }
 
-    val result: MutableList<Int> = mutableListOf();
+    val fibsList = fibs.take(count).toList()
+    val jsListResult = fibsList.map { it.toJsNumber() }.toJsArray()
 
-    for (i in 0 until mat1Dimension.toInt()) {
-        for (j in 0 until mat1Dimension.toInt()) {
-            result.add(
-                mat1.toList()[i + j] * mat2.toList()[j + i]
-            )
-        }
-    }
+    return jsListResult
+}
 
+@OptIn(ExperimentalJsExport::class, ExperimentalWasmJsInterop::class)
+@JsExport
+fun firstFibonacciNumbersBigInt(count: Int): JsArray<JsBigInt> {
+    val fibs: Sequence<Long> = generateSequence(Pair(1,1)) {
+        Pair(it.second, it.first + it.second)
+    }.map { it.first.toLong() }
 
-    val finalList = result.map { el -> el.toJsNumber() }
+    val fibsList = fibs.take(count).toList()
+    val jsListResult = fibsList.map { it.toJsBigInt() }.toJsArray()
 
-//    val list: List<JsNumber> =
-//        listOf(1, 2).map { it.toJsNumber() }
-
-    // Uses .toJsArray() to convert List or Array to JsArray
-    val jsArray: JsArray<JsNumber> = finalList.toJsArray()
-
-    return jsArray
+    return jsListResult
 }
